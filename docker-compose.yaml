@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # PHP с поддержкой Laravel
+  app:
+    image: php:8.2-fpm
+    container_name: laravel-app
+    working_dir: /var/www
+    volumes:
+      - ./laravel:/var/www
+    networks:
+      - laravel-network
+    restart: unless-stopped
+    build:
+      context: ./docker
+
+  # Веб-сервер Nginx
+  webserver:
+    image: nginx:latest
+    container_name: laravel-webserver
+    ports:
+      - "8095:80"
+    volumes:
+      - ./laravel:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - laravel-network
+    depends_on:
+      - app
+    restart: unless-stopped
+
+networks:
+  laravel-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
